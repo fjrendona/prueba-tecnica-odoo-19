@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="res_groups_privilege_sales_import" model="res.groups.privilege">
+        <field name="name">Análisis de ventas importadas</field>
+        <field name="sequence">20</field>
+        <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+
+    <record id="group_user" model="res.groups">
+        <field name="name">Usuario</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_sales_import"/>
+        <field name="implied_ids" eval="[Command.link(ref('base.group_user'))]"/>
+        <field name="comment">Consulta el tablero, importa archivos y crea o edita ventas.</field>
+    </record>
+
+    <record id="group_manager" model="res.groups">
+        <field name="name">Responsable</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_sales_import"/>
+        <field name="implied_ids" eval="[Command.link(ref('group_user'))]"/>
+        <field name="user_ids" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+        <field name="comment">Además borra ventas y lotes, y al importar puede crear clientes y productos nuevos.</field>
+    </record>
+
+    <data noupdate="1">
+        <record id="sales_import_record_company_rule" model="ir.rule">
+            <field name="name">Ventas importadas: multicompañía</field>
+            <field name="model_id" ref="model_sales_import_record"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="sales_import_batch_company_rule" model="ir.rule">
+            <field name="name">Lotes de importación: multicompañía</field>
+            <field name="model_id" ref="model_sales_import_batch"/>
+            <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+        </record>
+    </data>
+
+</odoo>

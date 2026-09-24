@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sales_import_batch_view_list" model="ir.ui.view">
+        <field name="name">sales.import.batch.list</field>
+        <field name="model">sales.import.batch</field>
+        <field name="arch" type="xml">
+            <list string="Lotes de importación" create="False">
+                <field name="create_date" string="Importado el"/>
+                <field name="name"/>
+                <field name="create_uid" string="Importado por" widget="many2one_avatar_user"/>
+                <field name="record_count" sum="Total"/>
+                <field name="new_partner_count" optional="hide"/>
+                <field name="new_product_count" optional="hide"/>
+                <field name="new_salesperson_count" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="sales_import_batch_view_form" model="ir.ui.view">
+        <field name="name">sales.import.batch.form</field>
+        <field name="model">sales.import.batch</field>
+        <field name="arch" type="xml">
+            <form string="Lote de importación" create="False" edit="False">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_records" type="object" class="oe_stat_button" icon="fa-list">
+                            <field name="record_count" widget="statinfo" string="Ventas"/>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="create_uid" string="Importado por"/>
+                            <field name="create_date" string="Importado el"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group>
+                            <field name="new_partner_count"/>
+                            <field name="new_product_count"/>
+                            <field name="new_salesperson_count"/>
+                            <field name="file_hash" groups="base.group_no_one"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sales_import_batch" model="ir.actions.act_window">
+        <field name="name">Lotes de importación</field>
+        <field name="res_model">sales.import.batch</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</odoo>

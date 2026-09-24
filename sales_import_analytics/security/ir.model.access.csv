@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sales_import_record_user,sales.import.record user,model_sales_import_record,group_user,1,1,1,0
+access_sales_import_record_manager,sales.import.record manager,model_sales_import_record,group_manager,1,1,1,1
+access_sales_import_batch_user,sales.import.batch user,model_sales_import_batch,group_user,1,0,1,0
+access_sales_import_batch_manager,sales.import.batch manager,model_sales_import_batch,group_manager,1,1,1,1
+access_sales_import_salesperson_user,sales.import.salesperson user,model_sales_import_salesperson,group_user,1,1,1,0
+access_sales_import_salesperson_manager,sales.import.salesperson manager,model_sales_import_salesperson,group_manager,1,1,1,1
+access_sales_import_wizard_user,sales.import.wizard user,model_sales_import_wizard,group_user,1,1,1,0
+access_sales_import_wizard_manager,sales.import.wizard manager,model_sales_import_wizard,group_manager,1,1,1,1

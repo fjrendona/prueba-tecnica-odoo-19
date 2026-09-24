@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_sales_import_root"
+              name="Análisis de Ventas"
+              web_icon="sales_import_analytics,static/description/icon.png"
+              groups="group_user"
+              sequence="40"/>
+
+    <menuitem id="menu_sales_import_dashboard"
+              name="Tablero"
+              parent="menu_sales_import_root"
+              action="action_sales_import_dashboard"
+              sequence="10"/>
+
+    <menuitem id="menu_sales_import_records"
+              name="Ventas"
+              parent="menu_sales_import_root"
+              action="action_sales_import_record"
+              sequence="20"/>
+
+    <menuitem id="menu_sales_import_wizard"
+              name="Importar Excel"
+              parent="menu_sales_import_root"
+              action="action_sales_import_wizard"
+              sequence="30"/>
+
+    <menuitem id="menu_sales_import_config"
+              name="Configuración"
+              parent="menu_sales_import_root"
+              sequence="90"/>
+
+    <menuitem id="menu_sales_import_batches"
+              name="Lotes de importación"
+              parent="menu_sales_import_config"
+              action="action_sales_import_batch"
+              sequence="10"/>
+
+    <menuitem id="menu_sales_import_salespersons"
+              name="Vendedores"
+              parent="menu_sales_import_config"
+              action="action_sales_import_salesperson"
+              sequence="20"/>
+
+</odoo>

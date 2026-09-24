@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sales_import_wizard_view_form" model="ir.ui.view">
+        <field name="name">sales.import.wizard.form</field>
+        <field name="model">sales.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importar ventas desde Excel">
+                <div class="alert alert-warning" role="alert" invisible="not duplicate_batch_id">
+                    Este archivo ya se importó en el lote
+                    <field name="duplicate_batch_id" readonly="True" class="fw-bold"/>.
+                    Marque «Importar de todas formas» para importarlo otra vez.
+                </div>
+                <group>
+                    <field name="file" filename="file_name" required="True"/>
+                    <field name="file_name" invisible="True"/>
+                    <field name="force_reimport" invisible="not duplicate_batch_id"/>
+                </group>
+                <div class="text-muted">
+                    Columnas: Fecha, Cliente, Vendedor, Producto, Cantidad, Valor Unitario,
+                    Valor Total y Estado (Borrador, Confirmada o Cancelada). Si alguna fila tiene
+                    errores no se importa nada y se muestran todos los errores.
+                    <field name="limits_note" class="d-inline" readonly="True"/>
+                </div>
+                <footer>
+                    <button name="action_import" string="Importar" type="object" class="btn-primary"
+                            data-hotkey="q"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary" data-hotkey="x"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_sales_import_wizard" model="ir.actions.act_window">
+        <field name="name">Importar ventas desde Excel</field>
+        <field name="res_model">sales.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+</odoo>

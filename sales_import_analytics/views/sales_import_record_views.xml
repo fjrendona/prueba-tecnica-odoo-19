@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="sales_import_record_view_list" model="ir.ui.view">
+        <field name="name">sales.import.record.list</field>
+        <field name="model">sales.import.record</field>
+        <field name="arch" type="xml">
+            <list string="Ventas" js_class="sales_import_realtime_list">
+                <field name="date"/>
+                <field name="partner_id"/>
+                <field name="salesperson_id"/>
+                <field name="product_id"/>
+                <field name="quantity"/>
+                <field name="price_unit"/>
+                <field name="amount_total" sum="Total"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'confirmed'"
+                       decoration-info="state == 'draft'"
+                       decoration-muted="state == 'cancelled'"/>
+                <field name="company_id" groups="base.group_multi_company" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="sales_import_record_view_form" model="ir.ui.view">
+        <field name="name">sales.import.record.form</field>
+        <field name="model">sales.import.record</field>
+        <field name="arch" type="xml">
+            <form string="Venta">
+                <header>
+                    <field name="state" widget="statusbar" options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="partner_id"/>
+                            <field name="salesperson_id"/>
+                            <field name="product_id"/>
+                        </group>
+                        <group>
+                            <field name="quantity"/>
+                            <field name="price_unit"/>
+                            <field name="amount_total"/>
+                            <field name="currency_id" invisible="True"/>
+                            <field name="batch_id" invisible="not batch_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="sales_import_record_view_search" model="ir.ui.view">
+        <field name="name">sales.import.record.search</field>
+        <field name="model">sales.import.record</field>
+        <field name="arch" type="xml">
+            <search string="Buscar ventas">
+                <field name="partner_id"/>
+                <field name="salesperson_id"/>
+                <field name="product_id"/>
+                <field name="batch_id"/>
+                <filter name="filter_confirmed" string="Confirmadas" domain="[('state', '=', 'confirmed')]"/>
+                <filter name="filter_draft" string="Borrador" domain="[('state', '=', 'draft')]"/>
+                <filter name="filter_cancelled" string="Canceladas" domain="[('state', '=', 'cancelled')]"/>
+                <separator/>
+                <filter name="filter_date" string="Fecha" date="date"/>
+                <group>
+                    <filter name="group_by_salesperson" string="Vendedor" context="{'group_by': 'salesperson_id'}"/>
+                    <filter name="group_by_partner" string="Cliente" context="{'group_by': 'partner_id'}"/>
+                    <filter name="group_by_product" string="Producto" context="{'group_by': 'product_id'}"/>
+                    <filter name="group_by_state" string="Estado" context="{'group_by': 'state'}"/>
+                    <filter name="group_by_month" string="Mes" context="{'group_by': 'date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="sales_import_record_view_graph" model="ir.ui.view">
+        <field name="name">sales.import.record.graph</field>
+        <field name="model">sales.import.record</field>
+        <field name="arch" type="xml">
+            <graph string="Análisis de ventas" type="bar" stacked="True" sample="1">
+                <!-- Eje X: mes. Series apiladas: estado; el segmento Confirmada es el total vendido. -->
+                <field name="date" interval="month" type="row"/>
+                <field name="state" type="col"/>
+                <field name="amount_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="sales_import_record_view_pivot" model="ir.ui.view">
+        <field name="name">sales.import.record.pivot</field>
+        <field name="model">sales.import.record</field>
+        <field name="arch" type="xml">
+            <pivot string="Análisis de ventas" sample="1">
+                <field name="date" interval="month" type="row"/>
+                <field name="state" type="col"/>
+                <field name="amount_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_sales_import_dashboard" model="ir.actions.act_window">
+        <field name="name">Tablero de ventas</field>
+        <field name="res_model">sales.import.record</field>
+        <field name="view_mode">graph,pivot,list,form</field>
+        <field name="search_view_id" ref="sales_import_record_view_search"/>
+        <field name="context">{'pivot_measures': ['amount_total', '__count']}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aún no hay ventas</p>
+            <p>Importa el Excel de ventas del mes para ver el análisis.</p>
+        </field>
+    </record>
+
+    <record id="action_sales_import_record" model="ir.actions.act_window">
+        <field name="name">Ventas</field>
+        <field name="res_model">sales.import.record</field>
+        <field name="view_mode">list,form,graph,pivot</field>
+        <field name="search_view_id" ref="sales_import_record_view_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Aún no hay ventas</p>
+            <p>Importa el Excel de ventas del mes desde el menú Importar Excel.</p>
+        </field>
+    </record>
+
+</odoo>
