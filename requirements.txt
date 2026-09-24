@@ -1,2 +1,7 @@
-# Dependencias Python de los módulos de este repo que no trae la imagen odoo:19.0.
+# Dependencias Python que no trae la imagen odoo:19.0.
 # Tras modificar este archivo: docker compose build odoo
+
+# Cliente del protocolo DevTools de Chrome, usado por HttpCase.browser_js para
+# ejecutar los tests JS (hoot) del módulo. Sin él, esos tests se saltan en
+# silencio ("websocket-client module is not installed").
+websocket-client==1.7.0

@@ -12,6 +12,17 @@ USER root
 # namespace `odoo.addons` por delante de /opt/odoo/addons y haría que módulos
 # como `sale` o `crm` se cargaran de la imagen en lugar del clon local.
 RUN rm -rf /usr/lib/python3/dist-packages/odoo
+# Chrome headless para los tests JS (hoot) y los tours que Odoo lanza con
+# HttpCase.browser_js. En Ubuntu 24.04 `chromium` solo existe como snap, así
+# que se instala el .deb oficial de Google desde su repositorio APT.
+RUN install -d -m 0755 /etc/apt/keyrings \
+    && curl -fsSL https://dl.google.com/linux/linux_signing_key.pub \
+        | gpg --dearmor -o /etc/apt/keyrings/google-chrome.gpg \
+    && echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/google-chrome.gpg] https://dl.google.com/linux/chrome/deb/ stable main" \
+        > /etc/apt/sources.list.d/google-chrome.list \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
 COPY requirements.txt /tmp/requirements.txt
 # --break-system-packages: la imagen de Odoo usa el Python del sistema (PEP 668).
 RUN pip install --no-cache-dir --break-system-packages -r /tmp/requirements.txt \

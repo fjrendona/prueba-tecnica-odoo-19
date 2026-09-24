@@ -44,7 +44,7 @@ Ejemplo: `2026-06-01 | Cliente A | Juan Pérez | Producto 1 | 2 | 50000 | 100000
 | Envío servidor | Emitir la notificación tras crear registros (`create` con `@api.model_create_multi`), **una por lote**, no una por registro. El bus encola en `precommit` y el mensaje sale al hacer commit, así que nunca llega un aviso de algo que luego hizo rollback. |
 
 Datos de la API verificados en el código fuente de Odoo 19:
-- Servidor: `record._bus_send(notification_type, payload)` (mixin `bus.listener.mixin`, implementado en `res.users`/`res.partner`) o `self.env["bus.bus"]._sendone(target, type, payload)`. Un canal `str` debe ser **no adivinable**. Preferir canales por registro (usuario o compañía) o añadirlos en `ir.websocket._build_bus_channel_list`.
+- Servidor (decisión R1 del plan): `env.ref("sales_import_analytics.group_user")._bus_send("sales_import_analytics/new_records", {})`. `res.groups` hereda `bus.listener.mixin` y `ir.websocket._build_bus_channel_list` suscribe automáticamente a cada sesión a **todos los grupos del usuario**: sin canal `str`, sin override y sin `addChannel`. El aviso sale al hacer commit (`cr.precommit`).
 - Cliente: servicio `bus_service` con `subscribe(type, cb)` / `unsubscribe(type, cb)` / `addChannel(channel)` (`addons/bus/static/src/services/bus_service.js`).
 - `openpyxl` 3.1.2 y `xlrd` 2.0.1 ya vienen en la imagen: no hace falta añadirlos a `requirements.txt`.
 
@@ -58,9 +58,9 @@ Datos de la API verificados en el código fuente de Odoo 19:
 | Búsqueda de referencias | Texto normalizado (sin espacios sobrantes, sin distinguir mayúsculas). Los existentes se precargan en un diccionario, sin `search` por fila. Al final, resumen de lo creado ("3 clientes y 2 productos nuevos"). |
 | Estado | `Selection`: `draft` / `confirmed` / `cancelled`. Mapeo tolerante mediante diccionario (sin distinguir mayúsculas ni tildes; admite "Confirmada", "confirmado", "Confirmed"…). Un valor desconocido es **error de fila**, nunca un valor por defecto. |
 | Valor Total | Se guarda el valor importado (`Monetary`, moneda de la compañía, no calculado) y se valida contra cantidad × unitario con la tolerancia de redondeo de la moneda. Si no coincide, error de fila. |
-| Duplicados | Por archivo, no por fila. Modelo `sales.import.batch` con nombre de archivo, hash SHA-256, usuario, fecha y conteos; cada venta enlaza a su lote. Si se sube un hash repetido, se bloquea salvo que se marque la opción explícita de forzar. Borrar un lote borra sus ventas. |
+| Duplicados | Por archivo, no por fila. Modelo `sales.import.batch` con nombre de archivo, huella SHA-256 **del contenido** (filas leídas y normalizadas, no los bytes: Excel cambia los bytes al reguardar), usuario, fecha y conteos; cada venta enlaza a su lote. Si la huella se repite, se bloquea salvo que se marque la opción explícita de forzar. Borrar un lote borra sus ventas. |
 | Errores de importación | Todo o nada: se validan todas las filas y se reportan todos los errores (fila y columna). Con un solo error no se crea nada. |
-| Total del mes | Graph y pivot agrupan por defecto por **mes de la fecha de venta**, no por el mes actual. Filtro por defecto **"Confirmadas"**, que el usuario puede quitar. |
+| Total del mes | Graph y pivot agrupan por defecto por **mes de la fecha de venta**, no por el mes actual. El gráfico apila por **estado** (el segmento Confirmada es el total vendido) y el tablero abre **sin filtro** para ver los tres estados; el filtro "Confirmadas" queda a un clic. *(Revisado por el usuario el 2026-09-24: antes era filtro por defecto "Confirmadas", que ocultaba Borrador y Cancelada.)* |
 | Dashboard | Base: acción nativa graph (por defecto), pivot y lista, con medidas total y número de ventas, y agrupaciones predefinidas por vendedor, cliente, producto y estado. **Opcional, solo si sobra tiempo:** acción cliente OWL con tarjetas de KPIs que embebe las vistas nativas mediante `View` (`@web/views/view`). |
 | Ramas | Una sola rama para toda la prueba: `feat/fjrendona-sales-import-analytics`, con commits por incremento. |
 
@@ -130,7 +130,13 @@ El código debe ser **limpio, modular, optimizado y seguro**. Estos principios s
 - Tiempo real: una notificación de bus por lote. En el cliente, throttle y un solo `load()` por ventana.
 
 **Seguridad**
-- Todo modelo y wizard con su línea en `ir.model.access.csv`. Nada de `sudo()` salvo necesidad justificada en un comentario, y nunca para saltarse las ACL del usuario que importa.
+- Todo modelo y wizard con su línea en `ir.model.access.csv`. Nada de `sudo()` salvo necesidad justificada en un comentario, y nunca para saltarse las ACL del usuario que importa, con una única excepción:
+  - **Excepción documentada a la regla de `sudo()`** (aprobada 2026-09-24): se permite `sudo()`
+    exclusivamente en métodos privados dedicados a crear los registros maestros faltantes durante la
+    importación (`res.partner`, `product.product`), bajo estas condiciones: (a) solo `create`, nunca
+    `write`/`unlink` sobre existentes; (b) campos limitados a una lista blanca mínima; (c) verificación
+    previa de que el usuario pertenece a `sales_import_analytics.group_manager`; (d) cada registro
+    creado queda contado en el lote de importación. Cualquier otro uso de `sudo()` sigue prohibido.
 - Sin SQL crudo con interpolación de cadenas: ORM o la clase `SQL` con parámetros.
 - Validar el archivo subido: extensión y contenido real (que `openpyxl` lo pueda abrir), tamaño máximo razonable, límite de filas y hojas vacías. Nunca ejecutar ni evaluar el contenido de las celdas (sin `eval` ni `safe_eval` sobre datos del usuario).
 - Errores al usuario con `UserError` / `ValidationError` y mensajes claros, sin volcar trazas ni detalles internos. Las excepciones inesperadas se registran en el log.
