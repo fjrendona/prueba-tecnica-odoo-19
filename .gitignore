@@ -1,0 +1,17 @@
+.env
+
+#AI (.claude/ se versiona: es entregable de la prueba)
+.agents/
+.specify/
+# Specs, planes y tareas generados por Spec Kit (/speckit-*)
+specs/
+.project-context-cache.md
+
+#Logs
+logs/*
+!logs/.gitkeep
+
+#Cache
+*.pyc
+*.pyo
+__pycache__/

@@ -1,0 +1,28 @@
+# `build: .` manda todo el contexto al daemon de Docker. El Dockerfile solo
+# necesita requirements.txt; el resto del repo se monta como volumen.
+.git
+.gitignore
+**/__pycache__
+*.py[cod]
+*.log
+*.swp
+logs/
+
+# Entornos y datos locales
+venv/
+.venv/
+env/
+filestore/
+sessions/
+.env
+
+# Cosas del editor y de la máquina de cada uno
+.vscode/
+.idea/
+.DS_Store
+
+# IA, planes de trabajo y caché de contexto
+.claude/
+.agents/
+.specify/
+.project-context-cache.md

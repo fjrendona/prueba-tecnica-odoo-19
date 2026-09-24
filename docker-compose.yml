@@ -1,0 +1,57 @@
+# Nombres de contenedor y puertos distintos a los del entorno Odoo 18
+# (odoo_db:5432 / odoo_18:8069) para que ambos puedan correr a la vez.
+services:
+  db:
+    image: postgres:16
+    container_name: odoo19_db
+    restart: unless-stopped
+    # Sin POSTGRES_DB a propósito: si Postgres crea la BD vacía, Odoo la da por
+    # existente y no la inicializa ("Database not initialized"). Así la crea
+    # Odoo (-d ${POSTGRES_DB}) con su plantilla e instala `base`.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  odoo:
+    # Imagen propia (ver Dockerfile): odoo:19.0 más requirements.txt.
+    # Tras cambiar requirements.txt: docker compose build odoo
+    build: .
+    image: prueba-odoo:19.0
+    container_name: odoo_19
+    depends_on:
+      db:
+        # El command no pasa por el entrypoint oficial (que espera a Postgres),
+        # así que se espera aquí al healthcheck.
+        condition: service_healthy
+    restart: unless-stopped
+    ports:
+      - "${ODOO_PORT:-8070}:8069"
+    volumes:
+      # Código fuente de Odoo 19 Community (clon de GitHub), solo lectura
+      - ${ODOO_SRC}:/opt/odoo:ro
+      # Monta todo el repo de addons personalizados
+      - ./:/mnt/extra-addons
+      # Persistir filestore y datos de Odoo (sesiones, adjuntos en file store)
+      - odoo_data:/var/lib/odoo
+    # Primer arranque: crea la BD ${POSTGRES_DB} e instala `base` sin datos demo
+    # (en Odoo 19 los datos demo ya van desactivados por defecto; --with-demo
+    # los activa).
+    command: >
+      python3 /opt/odoo/odoo-bin -d ${POSTGRES_DB}
+      --db_host=db --db_port=5432 --db_user=${POSTGRES_USER} --db_password=${POSTGRES_PASSWORD}
+      --addons-path=/opt/odoo/addons,/mnt/extra-addons
+      --db-filter=^${POSTGRES_DB}$$ --data-dir=/var/lib/odoo
+      -i base --log-level=info
+
+volumes:
+  pgdata:
+  odoo_data:

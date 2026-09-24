@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "caveman": {
+      "source": "juliusbrussee/caveman",
+      "sourceType": "github",
+      "skillPath": "skills/caveman/SKILL.md",
+      "computedHash": "e9192d111aa44ea90bd214d5aa2b4f640195b0717faedd881e4b3927da9d88e2"
+    },
+    "odoo-19": {
+      "source": "unclecatvn/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/odoo-19.0/SKILL.md",
+      "computedHash": "921f6d344b1ddd385b15a928c242b371a7d8d692f26f87c40b3c88f7967a1e12"
+    },
+    "ponytail": {
+      "source": "dietrichgebert/ponytail",
+      "sourceType": "github",
+      "skillPath": "skills/ponytail/SKILL.md",
+      "computedHash": "210fa0831f649ce9f8a305f7b7c8cf2a0dd09ac4dd53067109941b96e7811d4e"
+    }
+  }
+}

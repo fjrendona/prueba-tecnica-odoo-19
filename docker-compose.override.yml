@@ -1,0 +1,22 @@
+# Modo desarrollo. Docker Compose lo aplica automáticamente sobre
+# docker-compose.yml. Para arrancar sin él:
+#   docker compose -f docker-compose.yml up -d
+#
+# Para actualizar módulos en cada arranque, añadir al command:
+#   -u modulo_a,modulo_b
+services:
+  odoo:
+    volumes:
+      - ./:/mnt/extra-addons:rw
+      # Logs del contenedor escritos en ./logs/odoo.log del host. La carpeta
+      # debe ser escribible por el usuario `odoo` del contenedor (uid 100):
+      #   mkdir -p logs && chmod 777 logs
+      - ./logs:/var/log/odoo:rw
+    command: >
+      python3 /opt/odoo/odoo-bin -d ${POSTGRES_DB}
+      --db_host=db --db_port=5432 --db_user=${POSTGRES_USER} --db_password=${POSTGRES_PASSWORD}
+      --addons-path=/opt/odoo/addons,/mnt/extra-addons
+      --db-filter=^${POSTGRES_DB}$$ --data-dir=/var/lib/odoo
+      --log-level=${ODOO_LOG_LEVEL:-info}
+      --logfile=/var/log/odoo/odoo.log
+      --dev=reload,xml

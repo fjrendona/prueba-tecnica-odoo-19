@@ -1,0 +1,2 @@
+# Dependencias Python de los módulos de este repo que no trae la imagen odoo:19.0.
+# Tras modificar este archivo: docker compose build odoo
